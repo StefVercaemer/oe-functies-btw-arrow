@@ -4,42 +4,42 @@ var txtPrijsExcl, txtBtw;
 var divFeedBack;
 var btnBereken;
 
-window.addEventListener('load', Initieer);
-
-function Initieer() {
+window.addEventListener('load',() => {
   KoppelElementen();
   ToonStandaardwaarden();
   btnBereken = document.querySelector("#btnBereken");
-  btnBereken.addEventListener("click", ToonBerekeningPrijsIncl);
-}
+  KoppelEvents();
+});
 
-function KoppelElementen() {
+const KoppelElementen = () => {
   txtPrijsExcl = document.getElementById("txtPrijsExcl");
   txtBtw = document.getElementById("txtBtw");
   divFeedBack = document.getElementById("divFeedBack");
 }
 
-function ToonStandaardwaarden() {
+const KoppelEvents = () => {
+  btnBereken.addEventListener("click", () => {
+    let prijsExcl;
+    let prijsIncl;
+    let btwTarief;
+    let btwBedrag;
+    let feedback;
+    let berekeningBtw;
+  
+    prijsExcl = txtPrijsExcl.value;
+    btwTarief = txtBtw.value;
+    berekeningBtw = BerekenDeBtw(prijsExcl, btwTarief);
+    console.log(berekeningBtw);
+    divFeedBack.innerText = StelBerekeningsDetailOp(berekeningBtw, btwTarief, prijsExcl);
+  });
+}
+
+const ToonStandaardwaarden = () => {
   txtPrijsExcl.value = '100';
   txtBtw.value = '6';
 }
 
-function ToonBerekeningPrijsIncl() {
-  let prijsExcl;
-  let prijsIncl;
-  let btwTarief;
-  let btwBedrag;
-  let feedback;
-  let berekeningBtw;
-
-  prijsExcl = txtPrijsExcl.value;
-  btwTarief = txtBtw.value;
-  berekeningBtw = BerekenDeBtw(prijsExcl, btwTarief);
-  console.log(berekeningBtw);
-  divFeedBack.innerText = StelBerekeningsDetailOp(berekeningBtw, btwTarief, prijsExcl);
-}
-
-function StelBerekeningsDetailOp(berekeningsGegevens, btwTarief, prijsExcl) {
+const  StelBerekeningsDetailOp = (berekeningsGegevens, btwTarief, prijsExcl) => {
   let feedback;
   if(berekeningsGegevens.FoutMelding != "") feedback = berekeningsGegevens.FoutMelding;
   else {
@@ -52,18 +52,22 @@ function StelBerekeningsDetailOp(berekeningsGegevens, btwTarief, prijsExcl) {
   return feedback;
 }
 
-function BerekenDeBtw(prijsExcl, btwTarief) {
+const GeefBtwBedrag = (basisPrijs, tarief) => basisPrijs /100 * tarief;
+
+const GeefBedragInclBtw = (basisPrijs, tarief) => basisPrijs + GeefBtwBedrag(basisPrijs, tarief);
+
+const BerekenDeBtw = (prijsExcl, btwTarief) => {
   let foutmelding = "";
   let btwBedrag, prijsIncl;
   let basisPrijs, tarief;
   basisPrijs = parseFloat(prijsExcl);
   tarief = parseInt(btwTarief);
-
-  if(arguments.length != 2) foutmelding = "Wil 2 getallen doorgeven";
+  
+  if(!prijsExcl || !btwTarief) foutmelding = "Wil 2 getallen doorgeven";
   else if(isNaN(basisPrijs) || isNaN(tarief)) foutmelding = "Wil geldige getallen doorgeven";
   else {
-    btwBedrag = basisPrijs /100 * tarief;
-    prijsIncl = basisPrijs + btwBedrag;
+    btwBedrag = GeefBtwBedrag(basisPrijs,tarief);
+    prijsIncl = GeefBedragInclBtw(basisPrijs,tarief);
   }
   return {
     'FoutMelding' : foutmelding,
